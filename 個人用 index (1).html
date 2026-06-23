@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grimm Gravity — グリム重力脱出</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+  <div id="ui">
+    <div id="hud">
+      <span id="stageName"></span>
+      <span id="moveCount">moves: 0</span>
+    </div>
+    <div id="gravityIndicator">
+      <div id="gravArrow">↓</div>
+      <div id="gravLabel">重力</div>
+    </div>
+  </div>
+  <div id="overlay" class="hidden">
+    <div id="overlayBox">
+      <div id="overlayTitle"></div>
+      <div id="overlayText"></div>
+      <button id="overlayBtn"></button>
+    </div>
+  </div>
+  <div id="titleScreen">
+    <div id="titleContent">
+      <div id="titleLogo">
+        <div class="logo-line">GRIMM</div>
+        <div class="logo-line logo-line2">GRAVITY</div>
+        <div class="logo-sub">グリム重力脱出パズル</div>
+      </div>
+      <div id="titleStory">
+        魔女の呪いで立方体の迷宮に閉じ込められた。<br>
+        重力を操り、出口を目指せ。
+      </div>
+      <button id="startBtn">冒険を始める</button>
+      <div id="controls">
+        <div class="ctrl-row"><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd> または <kbd>A</kbd><kbd>W</kbd><kbd>D</kbd><kbd>S</kbd> — 重力方向変更</div>
+        <div class="ctrl-row"><kbd>R</kbd> — リセット &nbsp; <kbd>Z</kbd> — アンドゥ</div>
+      </div>
+    </div>
+    <div id="titleParticles"></div>
+  </div>
+  <!--
+    読み込み順序（依存関係）:
+      1. levels.js   — T, DIRS, STAGES を定義（他の全ファイルが参照）
+      2. renderer.js — canvas / ctx / render 系を定義（logic.js が呼び出す）
+      3. logic.js    — state / gameLoop など。levels & renderer に依存
+  -->
+  <script src="levels.js"></script>
+  <script src="renderer.js"></script>
+  <script src="logic.js"></script>
+</body>
+</html>
