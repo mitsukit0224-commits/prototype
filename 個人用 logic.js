@@ -12,6 +12,7 @@ let state = {
   grid: [],
   rows: 0, cols: 0,
   playerPos: { x: 0, y: 0 },
+  enemyPos: { x: 0, y: 0 },
   gravity: 'DOWN',
   hasKey: false,
   moves: 0,
@@ -65,6 +66,11 @@ function loadStage(idx) {
 
   const p = findOne(state.grid, T.PLAYER);
   state.playerPos = { x: p.x, y: p.y };
+
+  state.enemyPos = {
+    x: p.x,
+    y: Math.min(state.rows - 2, p.y + 2)
+  };
 
   fitCanvas();
   updateHUD();
@@ -174,6 +180,7 @@ function changeGravity(dir) {
   }
 
   state.grid = applyGravity(state.grid, dir);
+  moveEnemy();
   updateHUD();
   updateGravArrow(false);
   spawnGravParticles(dir);
@@ -304,6 +311,57 @@ function updateParticles() {
     p.life -= p.decay;
     return p.life > 0;
   });
+}
+
+function moveEnemy(){
+
+  const ex = state.enemyPos.x;
+  const ey = state.enemyPos.y;
+
+  const px = state.playerPos.x;
+  const py = state.playerPos.y;
+
+  let nx = ex;
+  let ny = ey;
+
+  if(Math.abs(px - ex) > Math.abs(py - ey)){
+
+    if(px > ex) nx++;
+    else if(px < ex) nx--;
+
+  }else{
+
+    if(py > ey) ny++;
+    else if(py < ey) ny--;
+
+  }
+
+  if(
+    nx >= 0 &&
+    nx < state.cols &&
+    ny >= 0 &&
+    ny < state.rows
+  ){
+
+    const tile = state.grid[ny][nx];
+
+    if(
+      tile !== T.WALL &&
+      tile !== T.DARK_WALL &&
+      tile !== T.DOOR
+    ){
+      state.enemyPos.x = nx;
+      state.enemyPos.y = ny;
+    }
+  }
+
+  if(
+    state.enemyPos.x === px &&
+    state.enemyPos.y === py
+  ){
+    state.gameOver = true;
+    setTimeout(showDeath,500);
+  }
 }
 
 // ================================================================

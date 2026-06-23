@@ -328,6 +328,8 @@ function render() {
   }
   ctx.globalAlpha = 1;
 
+  drawEnemy();
+
   // Stage clear flash
   if (state.won) {
     const alpha = Math.min(0.6, (time % 30) / 30 * 0.6);
@@ -696,6 +698,47 @@ function drawBackground(){
       drawIceBackground();
       break;
   }
+}
+
+
+function drawEnemy(){
+
+  const cs = state.cellSize;
+
+  const x = state.enemyPos.x * cs;
+  const y = state.enemyPos.y * cs;
+
+  ctx.fillStyle = "#7f1d1d";
+
+  ctx.beginPath();
+
+  ctx.arc(
+    x + cs/2,
+    y + cs/2,
+    cs*0.35,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+  // 目
+
+  ctx.fillStyle = "white";
+
+  ctx.beginPath();
+  ctx.arc(x+cs*0.40,y+cs*0.42,cs*0.05,0,Math.PI*2);
+  ctx.arc(x+cs*0.60,y+cs*0.42,cs*0.05,0,Math.PI*2);
+  ctx.fill();
+
+  // 瞳
+
+  ctx.fillStyle = "red";
+
+  ctx.beginPath();
+  ctx.arc(x+cs*0.40,y+cs*0.42,cs*0.02,0,Math.PI*2);
+  ctx.arc(x+cs*0.60,y+cs*0.42,cs*0.02,0,Math.PI*2);
+  ctx.fill();
 }
 
 
