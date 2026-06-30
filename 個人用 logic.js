@@ -13,6 +13,7 @@ let state = {
   rows: 0, cols: 0,
   playerPos: { x: 0, y: 0 },
   enemyPos: { x: 0, y: 0 },
+  enemyHistory: [],
   gravity: 'DOWN',
   hasKey: false,
   moves: 0,
@@ -67,10 +68,8 @@ function loadStage(idx) {
   const p = findOne(state.grid, T.PLAYER);
   state.playerPos = { x: p.x, y: p.y };
 
-  state.enemyPos = {
-    x: p.x,
-    y: Math.min(state.rows - 2, p.y + 2)
-  };
+  state.enemyPos = { x: p.x, y: p.y };
+  state.enemyHistory = [];
 
   fitCanvas();
   updateHUD();
@@ -159,6 +158,7 @@ function applyGravity(grid, grav) {
 //  Input — change gravity direction
 // ================================================================
 function changeGravity(dir) {
+  state.enemyHistory.push({ x: state.playerPos.x, y: state.playerPos.y });
   if (state.gameOver || state.won || !state.gameStarted) return;
 
   state.history.push({
@@ -254,6 +254,8 @@ function showDeath() {
 
 function showVictory() {
   const next = state.stage + 1;
+  if (typeof saveProgress === 'function') saveProgress(); // クラウドに進行状況を保存
+
   if (next < STAGES.length) {
     showOverlay(
       '✨ 脱出成功！',
@@ -313,55 +315,25 @@ function updateParticles() {
   });
 }
 
-function moveEnemy(){
-
-  const ex = state.enemyPos.x;
-  const ey = state.enemyPos.y;
-
-  const px = state.playerPos.x;
-  const py = state.playerPos.y;
-
-  let nx = ex;
-  let ny = ey;
-
-  if(Math.abs(px - ex) > Math.abs(py - ey)){
-
-    if(px > ex) nx++;
-    else if(px < ex) nx--;
-
-  }else{
-
-    if(py > ey) ny++;
-    else if(py < ey) ny--;
-
+function moveEnemy(){ 
+   if(state.enemyHistory.length < 2) return;  
+   
+   const pos = state.enemyHistory.shift();  
+   
+   state.enemyPos.x = pos.x;  
+   state.enemyPos.y = pos.y;  
+   
+   if(    
+    state.enemyPos.x === state.playerPos.x &&    
+    state.enemyPos.y === state.playerPos.y  
+  ){    
+    state.gameOver = true;    
+    setTimeout(showDeath,500);  
   }
+}
 
-  if(
-    nx >= 0 &&
-    nx < state.cols &&
-    ny >= 0 &&
-    ny < state.rows
-  ){
-
-    const tile = state.grid[ny][nx];
-
-    if(
-      tile !== T.WALL &&
-      tile !== T.DARK_WALL &&
-      tile !== T.DOOR
-    ){
-      state.enemyPos.x = nx;
-      state.enemyPos.y = ny;
-    }
-  }
-
-  if(
-    state.enemyPos.x === px &&
-    state.enemyPos.y === py
-  ){
-    state.gameOver = true;
-    setTimeout(showDeath,500);
-  }
+function cloneGrid(grid){
+  return grid.map(row => [...row]);
 }
 
 // ================================================================
@@ -415,20 +387,45 @@ document.getElementById('gameCanvas').addEventListener('touchend', e => {
 // ================================================================
 //  Start
 // ================================================================
-initTitleParticles();
+if (typeof initTitleParticles === 'function') initTitleParticles();
 gameLoop();
 
-document.getElementById('startBtn').addEventListener('click', () => {
-  const ts = document.getElementById('titleScreen');
-  ts.classList.add('fade-out');
-  setTimeout(() => { ts.style.display = 'none'; }, 500);
+const startBtn = document.getElementById('startBtn');
+if (startBtn) {
+  startBtn.addEventListener('click', async () => {
+    startBtn.disabled = true; // 二重クリック防止
+    const originalLabel = startBtn.textContent;
+    startBtn.textContent = '読み込み中…';
 
-  loadStage(0);
-  state.gameStarted = true;
+    let startStage = 0;
+    try {
+      await initPlayer();
+      const saved = await loadProgress();
+      if (saved && typeof saved.stage === 'number' && saved.stage < STAGES.length) {
+        startStage = saved.stage;
+      }
+    } catch (e) {
+      console.error('認証/ロード処理でエラー:', e);
+      // エラー時もオフラインでステージ1から開始できるようにする
+    }
 
-  const s = STAGES[0];
-  showOverlay(s.icon + ' ' + s.name, s.story, '出発！', () => {});
-});
+    startBtn.textContent = originalLabel;
+
+    const ts = document.getElementById('titleScreen');
+    if (ts) {
+      ts.classList.add('fade-out');
+      setTimeout(() => { ts.style.display = 'none'; }, 500);
+    }
+
+    loadStage(startStage);
+    state.gameStarted = true;
+
+    const s = STAGES[startStage];
+    showOverlay(s.icon + ' ' + s.name, s.story, '出発！', () => {});
+  });
+} else {
+  console.warn('startBtn not found — start button handler not attached');
+}
 
 window.addEventListener('resize', () => {
   if (state.gameStarted) fitCanvas();

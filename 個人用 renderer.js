@@ -4,6 +4,10 @@
 //        logic.js  (state)
 // ================================================================
 
+const wolfImg = new Image();
+wolfImg.src = "okami_halloween_gray.png";
+const forestNightBg = new Image();
+forestNightBg.src = "RPG background forest night.jpg";
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -285,8 +289,7 @@ function render() {
   const s = STAGES[state.stage];
   const pal = s.palette;
 
-  ctx.fillStyle = pal.bg;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawBackground();
 
   ctx.strokeStyle = pal.wall + '22';
   ctx.lineWidth = 0.5;
@@ -328,7 +331,9 @@ function render() {
   }
   ctx.globalAlpha = 1;
 
-  drawEnemy();
+  drawEnemy(state.enemyPos.x, state.enemyPos.y, cs);
+
+  drawShadow();
 
   // Stage clear flash
   if (state.won) {
@@ -701,83 +706,115 @@ function drawBackground(){
 }
 
 
-function drawEnemy(){
+function drawEnemy(x, y, cs){
 
-  const cs = state.cellSize;
+  const px = x * cs;
+  const py = y * cs;
 
-  const x = state.enemyPos.x * cs;
-  const y = state.enemyPos.y * cs;
-
-  ctx.fillStyle = "#7f1d1d";
-
-  ctx.beginPath();
-
-  ctx.arc(
-    x + cs/2,
-    y + cs/2,
-    cs*0.35,
-    0,
-    Math.PI*2
+  ctx.drawImage(
+    wolfImg,
+    px + cs*0.1,
+    py + cs*0.1,
+    cs*0.8,
+    cs*0.8
   );
+}
 
-  ctx.fill();
+function drawShadow(){
 
-  // 目
+  const cellSize = state.cellSize;
 
-  ctx.fillStyle = "white";
+  const x = state.shadowPos.x * cellSize;
+  const y = state.shadowPos.y * cellSize;
+
+  ctx.save();
+
+  ctx.globalAlpha = 0.45;
+
+  ctx.fillStyle = "#5b21b6";
 
   ctx.beginPath();
-  ctx.arc(x+cs*0.40,y+cs*0.42,cs*0.05,0,Math.PI*2);
-  ctx.arc(x+cs*0.60,y+cs*0.42,cs*0.05,0,Math.PI*2);
+  ctx.arc(
+    x + cellSize/2,
+    y + cellSize/2,
+    cellSize*0.38,
+    0,
+    Math.PI * 2
+  );
   ctx.fill();
 
-  // 瞳
-
-  ctx.fillStyle = "red";
-
-  ctx.beginPath();
-  ctx.arc(x+cs*0.40,y+cs*0.42,cs*0.02,0,Math.PI*2);
-  ctx.arc(x+cs*0.60,y+cs*0.42,cs*0.02,0,Math.PI*2);
-  ctx.fill();
+  ctx.restore();
 }
 
 
 // ===== Stage1 =====
 
 function drawForestBackground(){
+  if (forestNightBg.complete && forestNightBg.naturalWidth) {
+    ctx.drawImage(forestNightBg, 0, 0, canvas.width, canvas.height);
+  } else {
+    ctx.fillStyle = '#08120a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+}
 
-  const g = ctx.createLinearGradient(
-    0,0,
-    0,canvas.height
-  );
-
-  g.addColorStop(0,"#08120a");
-  g.addColorStop(1,"#18361a");
-
+function drawTowerBackground(){
+  const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  g.addColorStop(0, '#1f2937');
+  g.addColorStop(1, '#111827');
   ctx.fillStyle = g;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillRect(
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  );
+  ctx.fillStyle = 'rgba(148, 163, 184, 0.16)';
+  for (let i = 0; i < 18; i++) {
+    const x = (i / 18) * canvas.width;
+    ctx.fillRect(x, canvas.height * 0.18, canvas.width * 0.03, canvas.height * 0.65);
+  }
+}
 
-  ctx.fillStyle = "#0f250f";
+function drawCandyBackground(){
+  const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  g.addColorStop(0, '#fdf2f8');
+  g.addColorStop(1, '#fce7f3');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  for(let i=0;i<15;i++){
-
-    const x = i * 80;
-
+  for (let i = 0; i < 12; i++) {
     ctx.beginPath();
-
-    ctx.moveTo(x,canvas.height);
-    ctx.lineTo(x+20,canvas.height-80);
-    ctx.lineTo(x+40,canvas.height);
-
+    ctx.fillStyle = `rgba(251, 207, 232, ${0.15 - i * 0.01})`;
+    ctx.arc(canvas.width * (i / 12), canvas.height * 0.25, 46, 0, Math.PI * 2);
     ctx.fill();
   }
 }
+
+function drawPalaceBackground(){
+  const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  g.addColorStop(0, '#e0f2fe');
+  g.addColorStop(1, '#dbeafe');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
+  for (let i = 0; i < 10; i++) {
+    ctx.fillRect(canvas.width * (i / 10), canvas.height * 0.5, canvas.width * 0.04, canvas.height * 0.35);
+  }
+}
+
+function drawIceBackground(){
+  const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  g.addColorStop(0, '#dbeafe');
+  g.addColorStop(1, '#bae6fd');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+  for (let i = 0; i < 15; i++) {
+    ctx.beginPath();
+    ctx.arc(canvas.width * ((i + 0.5) / 15), canvas.height * 0.3, 28, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
 function drawCandyWall(cs, dark){
 
   // クッキー生地

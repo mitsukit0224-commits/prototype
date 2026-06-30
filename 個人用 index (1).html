@@ -46,12 +46,16 @@
   </div>
   <!--
     読み込み順序（依存関係）:
+      0. supabase-js — Supabase クライアント本体（CDN）
       1. levels.js   — T, DIRS, STAGES を定義（他の全ファイルが参照）
       2. renderer.js — canvas / ctx / render 系を定義（logic.js が呼び出す）
-      3. logic.js    — state / gameLoop など。levels & renderer に依存
+      3. auth.js     — 匿名認証・セーブデータ連携（supabase-js, state に依存）
+      4. logic.js    — state / gameLoop など。levels & renderer & auth に依存
   -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="個人用 levels.js"></script>
   <script src="個人用 renderer.js"></script>
+  <script src="個人用 auth.js"></script>
   <script src="個人用 logic.js"></script>
 </body>
 </html>
