@@ -5,9 +5,9 @@
 // ================================================================
 
 const wolfImg = new Image();
-wolfImg.src = "okami_halloween_gray.png";
+wolfImg.src = "ilust/okami_halloween_gray.png";
 const forestNightBg = new Image();
-forestNightBg.src = "RPG background forest night.jpg";
+forestNightBg.src = "ilust/RPG background forest night.jpg";
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 

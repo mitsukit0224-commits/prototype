@@ -13,6 +13,7 @@ let state = {
   rows: 0, cols: 0,
   playerPos: { x: 0, y: 0 },
   enemyPos: { x: 0, y: 0 },
+  shadowPos: { x: 0, y: 0 },
   enemyHistory: [],
   gravity: 'DOWN',
   hasKey: false,
@@ -252,21 +253,37 @@ function showDeath() {
   showOverlay('💀 やられた…', 'トゲに触れてしまった。\nもう一度挑め。', 'もう一度', () => loadStage(state.stage));
 }
 
-function showVictory() {
-  const next = state.stage + 1;
+async function showVictory() {
+  const clearedStage = state.stage;
+  const next = clearedStage + 1;
+
   if (typeof saveProgress === 'function') saveProgress(); // クラウドに進行状況を保存
+
+  let rankText = '';
+  if (typeof submitScore === 'function' && typeof getLeaderboard === 'function') {
+    try {
+      await submitScore(clearedStage, state.moves);
+      const top = await getLeaderboard(clearedStage, 5);
+      if (top.length > 0) {
+        rankText = '\n\n🏆 このステージの上位記録\n' +
+          top.map((r, i) => `${i + 1}位: ${r.moves}手`).join('\n');
+      }
+    } catch (e) {
+      console.error('ランキング処理エラー:', e);
+    }
+  }
 
   if (next < STAGES.length) {
     showOverlay(
       '✨ 脱出成功！',
-      STAGES[next].icon + ' 次のステージ\n「' + STAGES[next].name + '」へ',
+      STAGES[next].icon + ' 次のステージ\n「' + STAGES[next].name + '」へ' + rankText,
       '次へ進む',
       () => loadStage(next)
     );
   } else {
     showOverlay(
       '🎉 全ステージ制覇！',
-      'すべての魔法の牢獄から脱出した！\n君こそ真の重力の使い手だ。',
+      'すべての魔法の牢獄から脱出した！\n君こそ真の重力の使い手だ。' + rankText,
       '最初から',
       () => loadStage(0)
     );

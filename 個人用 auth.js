@@ -4,8 +4,8 @@
 // ================================================================
 
 // ▼▼▼ ここを自分のSupabaseプロジェクトの値に書き換えてください ▼▼▼
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+const SUPABASE_URL = 'https://wllgcgkgfxwzzaudqyga.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsbGdjZ2tnZnh3enphdWRxeWdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3OTkwNTYsImV4cCI6MjA5ODM3NTA1Nn0.L1cQZ0L5iV2LjzZ2bMCF49aB7cdR6TYCtfo0sNpq344';
 // ▲▲▲ Supabaseダッシュボード → Project Settings → API から取得 ▲▲▲
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -66,5 +66,38 @@ async function loadProgress() {
   } catch (e) {
     console.error('loadProgress エラー:', e);
     return null;
+  }
+}
+
+// ステージクリア記録をランキングに登録
+async function submitScore(stage, moves) {
+  if (!currentUser) return;
+  try {
+    const { error } = await supabaseClient
+      .from('leaderboard')
+      .insert({ user_id: currentUser.id, stage, moves });
+    if (error) console.error('スコア登録失敗:', error);
+  } catch (e) {
+    console.error('submitScore エラー:', e);
+  }
+}
+
+// 指定ステージの上位ランキングを取得（デフォルト5件）
+async function getLeaderboard(stage, limit = 5) {
+  try {
+    const { data, error } = await supabaseClient
+      .from('leaderboard')
+      .select('moves, created_at')
+      .eq('stage', stage)
+      .order('moves', { ascending: true })
+      .limit(limit);
+    if (error) {
+      console.error('ランキング取得失敗:', error);
+      return [];
+    }
+    return data ?? [];
+  } catch (e) {
+    console.error('getLeaderboard エラー:', e);
+    return [];
   }
 }
