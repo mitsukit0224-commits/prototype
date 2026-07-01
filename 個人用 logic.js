@@ -437,6 +437,10 @@ if (startBtn) {
     loadStage(startStage);
     state.gameStarted = true;
 
+    // スマホ用ボタンを表示
+    const mc = document.getElementById('mobileControls');
+    if (mc) mc.style.display = 'flex';
+
     const s = STAGES[startStage];
     showOverlay(s.icon + ' ' + s.name, s.story, '出発！', () => {});
   });

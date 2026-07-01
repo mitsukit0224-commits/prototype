@@ -1,0 +1,127 @@
+/* ================================================================
+   mobile.css — スマホ対応スタイル
+   依存: style.css の後に読み込む
+================================================================ */
+
+#mobileControls {
+  display: none;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  #gameCanvas {
+    top: 8px !important;
+  }
+
+  #hud {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+  }
+
+  #gravityIndicator {
+    font-size: 12px !important;
+  }
+
+  #mobileControls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: fixed;
+    bottom: 12px;
+    left: 12px;
+    z-index: 100;
+    pointer-events: auto;
+  }
+
+  #dpad {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .dpad-row {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .dpad-center {
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+  }
+
+  .dpad-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    background: rgba(139, 92, 246, 0.6);
+    color: #fff;
+    border: 2px solid rgba(167, 139, 250, 0.8);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    transition: background 0.1s, transform 0.1s;
+  }
+
+  .dpad-btn:active {
+    background: rgba(139, 92, 246, 1);
+    transform: scale(0.93);
+  }
+
+  #subBtns {
+    display: flex;
+    gap: 8px;
+  }
+
+  .sub-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+    background: rgba(255,255,255,0.1);
+    color: #ddd;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    transition: background 0.1s;
+  }
+
+  .sub-btn:active {
+    background: rgba(255,255,255,0.25);
+  }
+
+  #overlayBox {
+    font-size: 14px !important;
+    padding: 24px 20px !important;
+    max-width: 88vw !important;
+  }
+
+  #overlayTitle {
+    font-size: 22px !important;
+  }
+
+  .logo-line {
+    font-size: 48px !important;
+  }
+
+  .logo-sub {
+    font-size: 14px !important;
+  }
+
+  #titleStory {
+    font-size: 13px !important;
+  }
+
+  #controls {
+    display: none;
+  }
+}

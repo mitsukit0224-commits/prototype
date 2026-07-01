@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Grimm Gravity — グリム重力脱出</title>
   <link rel="stylesheet" href="個人用 style.css">
+  <link rel="stylesheet" href="個人用 mobile.css">
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
@@ -25,6 +26,23 @@
       <button id="overlayBtn"></button>
     </div>
   </div>
+  <!-- スマホ用コントロールボタン -->
+  <div id="mobileControls">
+    <div id="dpad">
+      <button class="dpad-btn" id="btnUp"    onclick="changeGravity('UP')">↑</button>
+      <div class="dpad-row">
+        <button class="dpad-btn" id="btnLeft"  onclick="changeGravity('LEFT')">←</button>
+        <div class="dpad-center"></div>
+        <button class="dpad-btn" id="btnRight" onclick="changeGravity('RIGHT')">→</button>
+      </div>
+      <button class="dpad-btn" id="btnDown"  onclick="changeGravity('DOWN')">↓</button>
+    </div>
+    <div id="subBtns">
+      <button class="sub-btn" onclick="undoMove()">↩ アンドゥ</button>
+      <button class="sub-btn" onclick="loadStage(state.stage)">↺ リセット</button>
+    </div>
+  </div>
+
   <div id="titleScreen">
     <div id="titleContent">
       <div id="titleLogo">
