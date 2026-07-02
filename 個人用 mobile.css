@@ -125,3 +125,11 @@
     display: none;
   }
 }
+
+/* タイトルの2ボタン横並び */
+#startBtns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}

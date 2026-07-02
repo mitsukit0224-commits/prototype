@@ -333,7 +333,6 @@ function render() {
 
   drawEnemy(state.enemyPos.x, state.enemyPos.y, cs);
 
-  drawShadow();
 
   // Stage clear flash
   if (state.won) {

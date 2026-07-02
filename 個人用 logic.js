@@ -68,6 +68,7 @@ function loadStage(idx) {
 
   const p = findOne(state.grid, T.PLAYER);
   state.playerPos = { x: p.x, y: p.y };
+  state.shadowPos = { x: p.x, y: p.y };
 
   state.enemyPos = { x: p.x, y: p.y };
   state.enemyHistory = [];
@@ -239,13 +240,38 @@ function updateGravArrow(instant) {
   }
 }
 
-function showOverlay(title, text, btn, cb) {
+function showOverlay(title, text, btn, cb, showTitleBtn = false) {
   const ov = document.getElementById('overlay');
   document.getElementById('overlayTitle').textContent = title;
   document.getElementById('overlayText').textContent = text;
   const b = document.getElementById('overlayBtn');
   b.textContent = btn;
   b.onclick = () => { ov.classList.add('hidden'); cb(); };
+
+  // タイトルに戻るボタン
+  const tb = document.getElementById('overlayTitleBtn');
+  if (showTitleBtn) {
+    tb.classList.remove('hidden');
+    tb.onclick = () => {
+      ov.classList.add('hidden');
+      state.gameStarted = false;
+      const mc = document.getElementById('mobileControls');
+      if (mc) mc.style.display = 'none';
+      const ts = document.getElementById('titleScreen');
+      if (ts) {
+        ts.style.display = '';
+        ts.classList.remove('fade-out');
+      }
+      // スタートボタンを再度押せるようにする
+      const sb = document.getElementById('startBtn');
+      if (sb) sb.disabled = false;
+      const cb = document.getElementById('continueBtn');
+      if (cb) cb.disabled = false;
+    };
+  } else {
+    tb.classList.add('hidden');
+  }
+
   ov.classList.remove('hidden');
 }
 
@@ -278,14 +304,16 @@ async function showVictory() {
       '✨ 脱出成功！',
       STAGES[next].icon + ' 次のステージ\n「' + STAGES[next].name + '」へ' + rankText,
       '次へ進む',
-      () => loadStage(next)
+      () => loadStage(next),
+      true
     );
   } else {
     showOverlay(
       '🎉 全ステージ制覇！',
       'すべての魔法の牢獄から脱出した！\n君こそ真の重力の使い手だ。' + rankText,
       '最初から',
-      () => loadStage(0)
+      () => loadStage(0),
+      true
     );
   }
 }
@@ -407,45 +435,56 @@ document.getElementById('gameCanvas').addEventListener('touchend', e => {
 if (typeof initTitleParticles === 'function') initTitleParticles();
 gameLoop();
 
-const startBtn = document.getElementById('startBtn');
-if (startBtn) {
-  startBtn.addEventListener('click', async () => {
-    startBtn.disabled = true; // 二重クリック防止
-    const originalLabel = startBtn.textContent;
-    startBtn.textContent = '読み込み中…';
-
-    let startStage = 0;
-    try {
-      await initPlayer();
+// ゲームを開始する共通関数
+async function startGame(fromBeginning) {
+  let startStage = 0;
+  try {
+    await initPlayer();
+    if (!fromBeginning) {
       const saved = await loadProgress();
       if (saved && typeof saved.stage === 'number' && saved.stage < STAGES.length) {
         startStage = saved.stage;
       }
-    } catch (e) {
-      console.error('認証/ロード処理でエラー:', e);
-      // エラー時もオフラインでステージ1から開始できるようにする
     }
+  } catch (e) {
+    console.error('認証/ロード処理でエラー:', e);
+  }
 
-    startBtn.textContent = originalLabel;
+  const ts = document.getElementById('titleScreen');
+  if (ts) {
+    ts.classList.add('fade-out');
+    setTimeout(() => { ts.style.display = 'none'; }, 500);
+  }
 
-    const ts = document.getElementById('titleScreen');
-    if (ts) {
-      ts.classList.add('fade-out');
-      setTimeout(() => { ts.style.display = 'none'; }, 500);
-    }
+  loadStage(startStage);
+  state.gameStarted = true;
 
-    loadStage(startStage);
-    state.gameStarted = true;
+  // スマホ用ボタンを表示
+  const mc = document.getElementById('mobileControls');
+  if (mc) mc.style.display = 'flex';
 
-    // スマホ用ボタンを表示
-    const mc = document.getElementById('mobileControls');
-    if (mc) mc.style.display = 'flex';
+  const s = STAGES[startStage];
+  showOverlay(s.icon + ' ' + s.name, s.story, '出発！', () => {});
+}
 
-    const s = STAGES[startStage];
-    showOverlay(s.icon + ' ' + s.name, s.story, '出発！', () => {});
+// はじめからボタン
+const startBtn = document.getElementById('startBtn');
+if (startBtn) {
+  startBtn.addEventListener('click', async () => {
+    startBtn.disabled = true;
+    await startGame(true); // ステージ1から
+    startBtn.disabled = false;
   });
-} else {
-  console.warn('startBtn not found — start button handler not attached');
+}
+
+// つづきからボタン
+const continueBtn = document.getElementById('continueBtn');
+if (continueBtn) {
+  continueBtn.addEventListener('click', async () => {
+    continueBtn.disabled = true;
+    await startGame(false); // 保存データから
+    continueBtn.disabled = false;
+  });
 }
 
 window.addEventListener('resize', () => {
