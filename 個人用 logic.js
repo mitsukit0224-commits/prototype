@@ -283,7 +283,7 @@ async function showVictory() {
   const clearedStage = state.stage;
   const next = clearedStage + 1;
 
-  if (typeof saveProgress === 'function') saveProgress(); // クラウドに進行状況を保存
+  if (typeof saveProgress === 'function') saveProgress(next < STAGES.length ? next : 0); // クラウドに進行状況を保存
 
   let rankText = '';
   if (typeof submitScore === 'function' && typeof getLeaderboard === 'function') {

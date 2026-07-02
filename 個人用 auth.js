@@ -36,10 +36,10 @@ async function initPlayer() {
 }
 
 // 進行状況をクラウドに保存
-async function saveProgress() {
+async function saveProgress(nextStage = null) {
   if (!currentUser) return;
   const saveData = {
-    stage: state.stage,
+    stage: nextStage !== null ? nextStage : state.stage,
     moves: state.moves,
   };
   try {
