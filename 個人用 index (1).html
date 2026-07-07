@@ -13,6 +13,7 @@
     <div id="hud">
       <span id="stageName"></span>
       <span id="moveCount">moves: 0</span>
+      <button id="nameSetBtn">✏️</button>
     </div>
     <div id="gravityIndicator">
       <div id="gravArrow">↓</div>
@@ -27,6 +28,15 @@
       <button id="overlayTitleBtn" class="hidden">🏠 タイトルに戻る</button>
     </div>
   </div>
+  <!-- プレイヤー名入力ダイアログ -->
+  <div id="nameDialog" class="hidden">
+    <div id="nameDialogBox">
+      <div id="nameDialogTitle">⚔️ 冒険者の名前を入力</div>
+      <input type="text" id="nameInput" maxlength="12" placeholder="名前(12文字以内)" />
+      <button id="nameSubmitBtn">決定</button>
+    </div>
+  </div>
+
   <!-- スマホ用コントロールボタン -->
   <div id="mobileControls">
     <div id="dpad">

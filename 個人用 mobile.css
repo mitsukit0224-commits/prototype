@@ -133,3 +133,95 @@
   justify-content: center;
   flex-wrap: wrap;
 }
+
+/* 名前入力ダイアログ */
+#nameDialog {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+#nameDialog.hidden {
+  display: none;
+}
+
+#nameDialogBox {
+  background: #1e1040;
+  border: 2px solid rgba(167,139,250,0.8);
+  border-radius: 16px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  min-width: 280px;
+}
+
+#nameDialogTitle {
+  color: #e9d5ff;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+#nameInput {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 2px solid rgba(167,139,250,0.6);
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  text-align: center;
+  outline: none;
+  box-sizing: border-box;
+}
+
+#nameInput:focus {
+  border-color: rgba(167,139,250,1);
+}
+
+#nameSubmitBtn {
+  padding: 10px 32px;
+  font-size: 15px;
+  background: rgba(139,92,246,0.8);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#nameSubmitBtn:hover {
+  background: rgba(139,92,246,1);
+}
+
+/* HUDの名前設定ボタン */
+#nameSetBtn {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+#nameSetBtn:hover {
+  opacity: 1;
+}
+
+/* HUDをcanvasより前面に */
+#ui {
+  z-index: 50;
+  position: relative;
+}
+
+#hud {
+  z-index: 50;
+  position: relative;
+  pointer-events: auto;
+}

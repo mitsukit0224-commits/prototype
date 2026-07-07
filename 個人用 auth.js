@@ -87,7 +87,7 @@ async function getLeaderboard(stage, limit = 5) {
   try {
     const { data, error } = await supabaseClient
       .from('leaderboard')
-      .select('moves, created_at')
+      .select('moves, created_at, user_id')
       .eq('stage', stage)
       .order('moves', { ascending: true })
       .limit(limit);
@@ -99,5 +99,35 @@ async function getLeaderboard(stage, limit = 5) {
   } catch (e) {
     console.error('getLeaderboard エラー:', e);
     return [];
+  }
+}
+
+// ユーザー名を保存
+async function saveUsername(username) {
+  if (!currentUser) return;
+  try {
+    const { error } = await supabaseClient
+      .from('player_saves')
+      .upsert({ user_id: currentUser.id, username, updated_at: new Date() });
+    if (error) console.error('ユーザー名保存失敗:', error);
+  } catch (e) {
+    console.error('saveUsername エラー:', e);
+  }
+}
+
+// ユーザー名を取得
+async function getUsername() {
+  if (!currentUser) return null;
+  try {
+    const { data, error } = await supabaseClient
+      .from('player_saves')
+      .select('username')
+      .eq('user_id', currentUser.id)
+      .single();
+    if (error) return null;
+    return data?.username ?? null;
+  } catch (e) {
+    console.error('getUsername エラー:', e);
+    return null;
   }
 }

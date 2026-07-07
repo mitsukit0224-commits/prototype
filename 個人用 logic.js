@@ -220,6 +220,37 @@ function undoMove() {
 }
 
 // ================================================================
+//  名前設定ダイアログ
+// ================================================================
+function openNameDialog() {
+  const dialog = document.getElementById('nameDialog');
+  const input = document.getElementById('nameInput');
+  const btn = document.getElementById('nameSubmitBtn');
+  if (!dialog) return;
+
+  dialog.classList.remove('hidden');
+  input.value = '';
+  input.focus();
+
+  btn.onclick = async () => {
+    const name = input.value.trim();
+    if (!name) return;
+    dialog.classList.add('hidden');
+    try {
+      await saveUsername(name);
+      console.log('名前を保存しました:', name);
+    } catch (e) {
+      console.warn('名前保存失敗:', e);
+    }
+  };
+
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter') btn.onclick();
+    if (e.key === 'Escape') dialog.classList.add('hidden');
+  };
+}
+
+// ================================================================
 //  HUD & UI helpers
 // ================================================================
 function updateHUD() {
@@ -291,8 +322,21 @@ async function showVictory() {
       await submitScore(clearedStage, state.moves);
       const top = await getLeaderboard(clearedStage, 5);
       if (top.length > 0) {
+        // ユーザーIDからユーザー名を取得
+        const userIds = [...new Set(top.map(r => r.user_id))];
+        const nameMap = {};
+        for (const uid of userIds) {
+          try {
+            const { data } = await supabaseClient
+              .from('player_saves')
+              .select('username')
+              .eq('user_id', uid)
+              .single();
+            nameMap[uid] = data?.username || '名無し';
+          } catch { nameMap[uid] = '名無し'; }
+        }
         rankText = '\n\n🏆 このステージの上位記録\n' +
-          top.map((r, i) => `${i + 1}位: ${r.moves}手`).join('\n');
+          top.map((r, i) => `${i + 1}位: ${r.moves}手 (${nameMap[r.user_id]})`).join('\n');
       }
     } catch (e) {
       console.error('ランキング処理エラー:', e);
@@ -381,6 +425,16 @@ function cloneGrid(grid){
   return grid.map(row => [...row]);
 }
 
+// 名前設定ボタンのイベント登録
+const nameSetBtn = document.getElementById('nameSetBtn');
+if (nameSetBtn) {
+  nameSetBtn.addEventListener('click', openNameDialog);
+  nameSetBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    openNameDialog();
+  });
+}
+
 // ================================================================
 //  Game loop
 // ================================================================
@@ -435,11 +489,36 @@ document.getElementById('gameCanvas').addEventListener('touchend', e => {
 if (typeof initTitleParticles === 'function') initTitleParticles();
 gameLoop();
 
+// 名前入力ダイアログを表示してユーザー名を返す
+function askUsername() {
+  return new Promise((resolve) => {
+    const dialog = document.getElementById('nameDialog');
+    const input = document.getElementById('nameInput');
+    const btn = document.getElementById('nameSubmitBtn');
+    dialog.classList.remove('hidden');
+    input.focus();
+    const submit = () => {
+      const name = input.value.trim();
+      if (!name) return;
+      dialog.classList.add('hidden');
+      resolve(name);
+    };
+    btn.onclick = submit;
+    input.onkeydown = (e) => { if (e.key === 'Enter') submit(); };
+  });
+}
+
 // ゲームを開始する共通関数
 async function startGame(fromBeginning) {
   let startStage = 0;
+
   try {
     await initPlayer();
+  } catch (e) {
+    console.warn('Supabase接続失敗:', e);
+  }
+
+  try {
     if (!fromBeginning) {
       const saved = await loadProgress();
       if (saved && typeof saved.stage === 'number' && saved.stage < STAGES.length) {
@@ -447,7 +526,7 @@ async function startGame(fromBeginning) {
       }
     }
   } catch (e) {
-    console.error('認証/ロード処理でエラー:', e);
+    console.warn('セーブデータ取得失敗:', e);
   }
 
   const ts = document.getElementById('titleScreen');
